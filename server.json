@@ -1,44 +1,20 @@
 {
-  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/registry/main/schema/server.schema.json",
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.SunrisesIllNeverSee/tteop-mcp",
-  "description": "TTEOP MCP Server — Build, validate, and describe TTEOP telemetry envelopes for AI operator token efficiency measurement.",
+  "description": "TTEOP MCP Server — build, validate, and describe TTEOP telemetry envelopes.",
   "repository": {
-    "type": "git",
-    "url": "https://github.com/SunrisesIllNeverSee/tteop-mcp"
+    "url": "https://github.com/SunrisesIllNeverSee/tteop-mcp",
+    "source": "github"
   },
   "version": "0.1.1",
   "packages": [
     {
       "registryType": "npm",
-      "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "tteop-mcp",
       "version": "0.1.1",
       "transport": {
-        "type": "stdio",
-        "command": "npx",
-        "args": ["-y", "tteop-mcp"]
+        "type": "stdio"
       }
     }
-  ],
-  "tools": [
-    {
-      "name": "tteop_build_envelope",
-      "description": "Build a TTEOP v0.1-draft schema-conforming telemetry envelope from token counts. Computes Yield, Leverage, Velocity, output_fraction, and log_leverage."
-    },
-    {
-      "name": "tteop_validate_envelope",
-      "description": "Validate a TTEOP v0.1-draft telemetry envelope against the JSON Schema and semantic rules."
-    },
-    {
-      "name": "tteop_describe_protocol",
-      "description": "Get TTEOP protocol metadata: version, privacy modes, provenance levels, metric definitions."
-    },
-    {
-      "name": "tteop_run_conformance",
-      "description": "Run the TTEOP conformance suite: canonical vector invariants, null semantics, forbidden field detection."
-    }
-  ],
-  "license": "Apache-2.0",
-  "homepage": "https://github.com/SunrisesIllNeverSee/tteop-mcp",
-  "keywords": ["tteop", "mcp", "token-efficiency", "telemetry", "ai-operators", "yield", "leverage", "sigrank"]
+  ]
 }
