@@ -1,0 +1,13 @@
+{
+  "$schema": "https://glama.ai/mcp/schemas/server.json",
+  "maintainers": ["SunrisesIllNeverSee"],
+  "displayName": "TTEOP MCP Server",
+  "description": "Production MCP server for TTEOP — Token Telemetry Evaluation Operator Protocol. Build, validate, and describe TTEOP telemetry envelopes for AI operator token efficiency measurement.",
+  "category": "developer-tools",
+  "npmPackage": "tteop-mcp",
+  "buildSpec": {
+    "type": "npm",
+    "command": "npx",
+    "args": ["-y", "tteop-mcp"]
+  }
+}
