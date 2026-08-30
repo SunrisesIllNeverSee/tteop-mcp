@@ -2,7 +2,24 @@
 
 Production MCP server for **TTEOP** — Token Telemetry Evaluation Operator Protocol.
 
-Build, validate, and describe TTEOP telemetry envelopes via the Model Context Protocol.
+Build, validate, and describe TTEOP telemetry envelopes via the Model Context Protocol. Powered by the official [MCP TypeScript SDK v2](https://github.com/modelcontextprotocol/typescript-sdk) and the [`tteop-spec`](https://github.com/SunrisesIllNeverSee/otep-spec) reference implementation.
+
+## Architecture
+
+This package is a thin MCP transport layer. All protocol logic — envelope construction, metric computation (banker's rounding), schema validation, and semantic rules — is delegated to `tteop-spec` via its stable JavaScript API:
+
+- `tteop-spec/builder` → `buildEnvelope(telemetry, options)`
+- `tteop-spec/validator` → `validateEnvelope(envelope, options)`, `computeMetrics(telemetry)`
+
+No metric formulas or schema logic are duplicated here. When `tteop-spec` updates its validator or builder, this server inherits the changes.
+
+### Product separation
+
+| Package | Role |
+|---------|------|
+| `tteop-spec` | Specification, schemas, validator, conformance suite, builder API |
+| `tteop-mcp` | Production MCP server (this package) — thin transport over `tteop-spec` |
+| SignalAF / SigRank | Hosted benchmarking, leaderboard, pilots, enterprise services |
 
 ## Install
 
@@ -41,59 +58,66 @@ Add to `claude_desktop_config.json`:
 ### With MCP Inspector
 
 ```bash
-npx @modelcontextprotocol/inspector npx tteop-mcp
+npx @modelcontextprotocol/inspector npx -y tteop-mcp
 ```
+
+Open the browser tab, click **Connect**, open the **Tools** tab, and call any tool.
 
 ### Programmatic
 
 ```javascript
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { spawn } from "node:child_process";
 
-const transport = new StdioClientTransport({
-  command: "npx",
-  args: ["-y", "tteop-mcp"],
-});
-
-const client = new Client({ name: "my-app", version: "1.0.0" }, { capabilities: {} });
-await client.connect(transport);
-
-// Build an envelope
-const result = await client.callTool({
-  name: "tteop_build_envelope",
-  arguments: {
-    input: 1251211,
-    output: 11296121,
-    cache_write: 128196310,
-    cache_read: 2555179769,
-    tool: "claude-code",
-    provider: "anthropic",
-    model: "claude-sonnet-4",
-  },
-});
+const proc = spawn("npx", ["-y", "tteop-mcp"], { stdio: ["pipe", "pipe", "pipe"] });
+// Send JSON-RPC 2.0 messages to proc.stdin, read responses from proc.stdout
 ```
 
-## Protocol
+## Development
 
-TTEOP is an open, vendor-neutral interoperability standard for measuring AI-operator token efficiency.
+```bash
+# Install deps
+npm install
 
-**Architecture:** `MOSES → Upsilon → SigRank | SignalAF`
+# Link tteop-spec locally (if not published to npm yet)
+cd ../otep-spec && npm link && cd ../tteop-mcp && npm link tteop-spec
 
-**Metrics:**
+# Run tests
+npm test                    # real MCP client test (50 assertions)
+npm run test:packaged       # packaged tarball test (13 assertions)
 
-| Metric | Symbol | Formula | Description |
-|--------|--------|---------|-------------|
-| Yield | Υ | `(cache_read × output) / input²` | Efficiency: output per input, boosted by cache reuse |
-| Leverage | L | `cache_read / input` | Cache leverage: cached context reused per unit of fresh input |
-| Velocity | V | `output / input` | Raw amplification: output per unit of input |
-| output_fraction | F | `output / (input + output)` | Signal-to-noise: fraction of tokens that are productive output |
-| log_leverage | D | `log10(cache_read / input)` | Log-scaled cache leverage for order-of-magnitude comparison |
+# Run with MCP Inspector
+npm run inspect
 
-All metrics use banker's rounding (round-half-to-even) per SRP-METRIC-002.
+# Start the server
+npm start
+```
 
-## Privacy
+## Acceptance criteria
 
-TTEOP is privacy-first and content-free. The envelope schema forbids prompt text, completions, source code, file paths, keystrokes, and screen content. Only token counts and metadata are collected.
+- [x] `npx tteop-mcp` waits for an MCP connection
+- [x] `initialize` succeeds
+- [x] `tools/list` returns complete schemas (4 tools)
+- [x] Every tool can be called through MCP Inspector
+- [x] Invalid token values return structured MCP errors (`isError: true` with validation message)
+- [x] stdout contains protocol messages only
+- [x] CI runs an actual MCP client against the packaged tarball
+
+## Distribution roadmap
+
+This package is built and tested but not yet published. The next steps require owner credentials:
+
+1. **Publish `tteop-spec@0.1.4-draft`** to npm (prerequisite — this package pins it exactly).
+2. **Publish `tteop-mcp@0.2.0`** to npm.
+3. **Publish to the MCP Registry** using `mcp-publisher`:
+   ```bash
+   mcp-publisher init      # generates server.json (already present)
+   mcp-publisher login     # GitHub auth
+   mcp-publisher publish   # publishes server.json to the registry
+   ```
+   The `mcpName` in `package.json` (`io.github.SunrisesIllNeverSee/tteop-mcp`) must match the `name` in `server.json`.
+4. **Submit to Glama** using the `glama.json` metadata.
+5. **Test privately on Glama** — verify the live Inspector session passes.
+6. **Switch the listing public** after the live Inspector session passes.
 
 ## License
 

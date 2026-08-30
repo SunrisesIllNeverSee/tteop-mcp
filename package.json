@@ -1,6 +1,6 @@
 {
   "name": "tteop-mcp",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "mcpName": "io.github.SunrisesIllNeverSee/tteop-mcp",
   "description": "Production MCP server for TTEOP — Token Telemetry Evaluation Operator Protocol. Build, validate, and describe TTEOP telemetry envelopes via the Model Context Protocol.",
   "type": "module",
@@ -10,7 +10,8 @@
   "scripts": {
     "start": "node bin/tteop-mcp.mjs",
     "inspect": "npx @modelcontextprotocol/inspector node bin/tteop-mcp.mjs",
-    "test": "node test/test-server.mjs"
+    "test": "node test/test-mcp-client.mjs",
+    "test:packaged": "node test/test-packaged-tarball.mjs"
   },
   "keywords": [
     "tteop",
@@ -27,27 +28,25 @@
   ],
   "author": "Deric J McHenry <hello@signalaf.com>",
   "license": "Apache-2.0",
-  "homepage": "https://github.com/SunrisesIllNeverSee/otep-spec#readme",
+  "homepage": "https://github.com/SunrisesIllNeverSee/tteop-mcp#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/SunrisesIllNeverSee/otep-spec.git",
-    "directory": "integrations/mcp"
+    "url": "https://github.com/SunrisesIllNeverSee/tteop-mcp.git"
   },
   "bugs": {
-    "url": "https://github.com/SunrisesIllNeverSee/otep-spec/issues"
+    "url": "https://github.com/SunrisesIllNeverSee/tteop-mcp/issues"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.0",
-    "ajv": "^8.20.0",
-    "ajv-formats": "^3.0.1"
+    "@modelcontextprotocol/server": "2.0.0",
+    "tteop-spec": "0.1.4-draft",
+    "zod": "4.5.4"
   },
   "files": [
     "bin/",
     "src/",
-    "schemas/",
     "server.json",
     "README.md",
     "LICENSE"

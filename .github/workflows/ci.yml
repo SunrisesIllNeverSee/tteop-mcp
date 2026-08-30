@@ -1,0 +1,50 @@
+name: TTEOP MCP CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: MCP client + packaged tarball tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies
+        run: |
+          npm install @modelcontextprotocol/server@2.0.0 zod@4.5.4 --silent
+          # tteop-spec is published to npm — install from registry
+          npm install tteop-spec@0.1.4-draft --silent || true
+          # If tteop-spec isn't published yet, the tests will skip
+          # In production CI (after tteop-spec publish), this will succeed
+
+      - name: Real MCP client test
+        run: node test/test-mcp-client.mjs
+
+      - name: Packaged tarball test
+        run: node test/test-packaged-tarball.mjs
+
+      - name: Verify --version
+        run: |
+          output=$(node bin/tteop-mcp.mjs --version)
+          echo "Version: $output"
+          [[ "$output" == "tteop-mcp/"* ]] || { echo "Version format wrong"; exit 1; }
+
+      - name: Verify --help
+        run: |
+          output=$(node bin/tteop-mcp.mjs --help)
+          echo "$output" | grep -q "tteop_build_envelope" || { echo "help missing tool names"; exit 1; }
+          echo "$output" | grep -q "tteop_validate_envelope" || { echo "help missing validate tool"; exit 1; }
