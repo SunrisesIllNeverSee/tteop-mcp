@@ -1,11 +1,25 @@
 {
-  "mcpName": "io.tteop.mcp",
-  "version": "0.1.0",
+  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/registry/main/schema/server.schema.json",
+  "name": "io.github.SunrisesIllNeverSee/tteop-mcp",
   "description": "TTEOP MCP Server — Build, validate, and describe TTEOP telemetry envelopes for AI operator token efficiency measurement.",
-  "transport": "stdio",
-  "runtime": "node",
-  "command": "npx",
-  "args": ["-y", "tteop-mcp"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SunrisesIllNeverSee/tteop-mcp"
+  },
+  "version": "0.1.1",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "tteop-mcp",
+      "version": "0.1.1",
+      "transport": {
+        "type": "stdio",
+        "command": "npx",
+        "args": ["-y", "tteop-mcp"]
+      }
+    }
+  ],
   "tools": [
     {
       "name": "tteop_build_envelope",
@@ -24,14 +38,7 @@
       "description": "Run the TTEOP conformance suite: canonical vector invariants, null semantics, forbidden field detection."
     }
   ],
-  "protocol": {
-    "name": "TTEOP",
-    "version": "tteop/0.1-draft",
-    "schema": "https://tteop.dev/schemas/telemetry-envelope-v0.1.schema.json",
-    "specification": "https://github.com/SunrisesIllNeverSee/otep-spec"
-  },
   "license": "Apache-2.0",
-  "homepage": "https://github.com/SunrisesIllNeverSee/otep-spec",
-  "repository": "https://github.com/SunrisesIllNeverSee/otep-spec",
+  "homepage": "https://github.com/SunrisesIllNeverSee/tteop-mcp",
   "keywords": ["tteop", "mcp", "token-efficiency", "telemetry", "ai-operators", "yield", "leverage", "sigrank"]
 }

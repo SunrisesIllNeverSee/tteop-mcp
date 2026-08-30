@@ -1,6 +1,7 @@
 {
   "name": "tteop-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "mcpName": "io.github.SunrisesIllNeverSee/tteop-mcp",
   "description": "Production MCP server for TTEOP — Token Telemetry Evaluation Operator Protocol. Build, validate, and describe TTEOP telemetry envelopes via the Model Context Protocol.",
   "type": "module",
   "bin": {
