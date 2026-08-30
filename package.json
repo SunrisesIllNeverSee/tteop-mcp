@@ -1,0 +1,54 @@
+{
+  "name": "tteop-mcp",
+  "version": "0.1.0",
+  "description": "Production MCP server for TTEOP — Token Telemetry Evaluation Operator Protocol. Build, validate, and describe TTEOP telemetry envelopes via the Model Context Protocol.",
+  "type": "module",
+  "bin": {
+    "tteop-mcp": "bin/tteop-mcp.mjs"
+  },
+  "scripts": {
+    "start": "node bin/tteop-mcp.mjs",
+    "inspect": "npx @modelcontextprotocol/inspector node bin/tteop-mcp.mjs",
+    "test": "node test/test-server.mjs"
+  },
+  "keywords": [
+    "tteop",
+    "mcp",
+    "model-context-protocol",
+    "token-efficiency",
+    "telemetry",
+    "ai-operators",
+    "conformance",
+    "protocol",
+    "yield",
+    "leverage",
+    "sigrank"
+  ],
+  "author": "Deric J McHenry <hello@signalaf.com>",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/SunrisesIllNeverSee/otep-spec#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SunrisesIllNeverSee/otep-spec.git",
+    "directory": "integrations/mcp"
+  },
+  "bugs": {
+    "url": "https://github.com/SunrisesIllNeverSee/otep-spec/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "schemas/",
+    "server.json",
+    "README.md",
+    "LICENSE"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "mcpName": "io.tteop.mcp",
+  "version": "0.1.0",
+  "description": "TTEOP MCP Server — Build, validate, and describe TTEOP telemetry envelopes for AI operator token efficiency measurement.",
+  "transport": "stdio",
+  "runtime": "node",
+  "command": "npx",
+  "args": ["-y", "tteop-mcp"],
+  "tools": [
+    {
+      "name": "tteop_build_envelope",
+      "description": "Build a TTEOP v0.1-draft schema-conforming telemetry envelope from token counts. Computes Yield, Leverage, Velocity, output_fraction, and log_leverage."
+    },
+    {
+      "name": "tteop_validate_envelope",
+      "description": "Validate a TTEOP v0.1-draft telemetry envelope against the JSON Schema and semantic rules."
+    },
+    {
+      "name": "tteop_describe_protocol",
+      "description": "Get TTEOP protocol metadata: version, privacy modes, provenance levels, metric definitions."
+    },
+    {
+      "name": "tteop_run_conformance",
+      "description": "Run the TTEOP conformance suite: canonical vector invariants, null semantics, forbidden field detection."
+    }
+  ],
+  "protocol": {
+    "name": "TTEOP",
+    "version": "tteop/0.1-draft",
+    "schema": "https://tteop.dev/schemas/telemetry-envelope-v0.1.schema.json",
+    "specification": "https://github.com/SunrisesIllNeverSee/otep-spec"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/SunrisesIllNeverSee/otep-spec",
+  "repository": "https://github.com/SunrisesIllNeverSee/otep-spec",
+  "keywords": ["tteop", "mcp", "token-efficiency", "telemetry", "ai-operators", "yield", "leverage", "sigrank"]
+}

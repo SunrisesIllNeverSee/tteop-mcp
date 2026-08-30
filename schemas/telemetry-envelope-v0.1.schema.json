@@ -1,0 +1,217 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tteop.dev/schemas/telemetry-envelope-v0.1.schema.json",
+  "title": "TTEOP Telemetry Envelope v0.1-draft",
+  "description": "Canonical telemetry envelope for AI-operator token-processing data per TTEOP v0.1-draft specification.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol_version",
+    "telemetry",
+    "observation",
+    "source",
+    "provenance",
+    "privacy"
+  ],
+  "properties": {
+    "protocol_version": {
+      "description": "TTEOP protocol version string. Legacy aliases 'otep/0.1-draft' (pre-rename) and 'sigrank/0.1-draft' (legacy distribution) accepted. See UNRESOLVED-DECISIONS.md UD-1.",
+      "type": "string",
+      "enum": ["tteop/0.1-draft", "otep/0.1-draft", "sigrank/0.1-draft"]
+    },
+    "metric_spec_version": {
+      "description": "Metric specification version. SHOULD be present.",
+      "type": "string"
+    },
+    "collector_version": {
+      "description": "Version of the collector software that produced this envelope.",
+      "type": "string"
+    },
+    "operator": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pseudonymous_key": {
+          "description": "Pseudonymous operator identifier. MUST NOT contain real-world identity.",
+          "type": "string",
+          "minLength": 1
+        },
+        "cohort_id": {
+          "description": "Cohort identifier for private-managed-cohort mode. Null for public-pseudonymous.",
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["timestamp"],
+      "properties": {
+        "timestamp": {
+          "description": "RFC 3339 date-time when this observation was recorded.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "window_start": {
+          "description": "RFC 3339 date-time marking the start of the observation window.",
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "window_end": {
+          "description": "RFC 3339 date-time marking the end of the observation window.",
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "window_duration_seconds": {
+          "description": "Duration of the observation window in seconds.",
+          "type": ["integer", "null"],
+          "minimum": 0
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tool"],
+      "properties": {
+        "tool": {
+          "description": "Name of the AI tool or interface (e.g., 'claude-code', 'cursor', 'copilot').",
+          "type": "string",
+          "minLength": 1
+        },
+        "platform": {
+          "description": "Platform name (e.g., 'vscode', 'terminal', 'web').",
+          "type": ["string", "null"]
+        },
+        "provider": {
+          "description": "AI provider name (e.g., 'anthropic', 'openai', 'google').",
+          "type": ["string", "null"]
+        },
+        "model": {
+          "description": "Model identifier (e.g., 'claude-sonnet-4', 'gpt-4o').",
+          "type": ["string", "null"]
+        },
+        "adapter_id": {
+          "description": "Identifier of the provider adapter used to map native fields.",
+          "type": ["string", "null"]
+        },
+        "adapter_version": {
+          "description": "Version of the provider adapter.",
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "telemetry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input", "output", "cache_write", "cache_read"],
+      "properties": {
+        "input": {
+          "description": "Fresh input-token quantity (non-negative integer). MUST NOT be null.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "output": {
+          "description": "Output-token quantity (non-negative integer). MUST NOT be null.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cache_write": {
+          "description": "Tokens written to cache (non-negative integer or null if unsupported).",
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cache_read": {
+          "description": "Tokens read from cache (non-negative integer or null if unsupported).",
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      }
+    },
+    "raw_provider_fields": {
+      "description": "Provider-native fields for debugging. MUST NOT be used for metric computation. Values MUST be scalar (string, number, boolean, null) — no nested objects or arrays.",
+      "type": "object",
+      "additionalProperties": {
+        "type": ["string", "number", "integer", "boolean", "null"]
+      }
+    },
+    "validity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": ["valid", "invalid", "partial"]
+        },
+        "missingness_flags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "cache_write_unsupported",
+              "cache_read_unsupported",
+              "cache_write_not_reported",
+              "cache_read_not_reported",
+              "provider_field_mapping_uncertain",
+              "partial_cache_missing"
+            ]
+          }
+        },
+        "anomaly_flags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level"],
+      "properties": {
+        "level": {
+          "enum": ["self-reported", "collector-attested", "platform-verified", "signed"]
+        },
+        "signature_status": {
+          "enum": ["unsigned", "valid", "invalid", "not-applicable", "signature-present-unverified"]
+        }
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": {
+        "mode": {
+          "enum": ["public-pseudonymous", "private-managed-cohort", "enterprise-isolated"]
+        }
+      }
+    },
+    "metrics": {
+      "description": "Computed metrics. Present when the producer is also a metric-engine.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["yield", "leverage", "velocity", "output_fraction", "log_leverage"],
+      "properties": {
+        "yield": { "type": ["number", "null"] },
+        "leverage": { "type": ["number", "null"] },
+        "velocity": { "type": ["number", "null"] },
+        "output_fraction": { "type": ["number", "null"] },
+        "log_leverage": { "type": ["number", "null"] }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "extensions": {
+      "description": "Namespace-prefixed extension fields. Keys MUST use a reverse-DNS prefix.",
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

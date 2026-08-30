@@ -1,0 +1,20 @@
+TTEOP — Token Telemetry Evaluation Operator Protocol
+
+Dual license:
+
+1. Specification documents (SPEC.md, schemas/, metrics/, profiles/, adapters/,
+   teps/, examples/, test-vectors/, and all .md governance/roadmap documents)
+   are licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
+   https://creativecommons.org/licenses/by/4.0/
+
+2. Executable code (reference/, conformance/, integrations/, python/, bin/,
+   lib/, scripts/) is licensed under Apache License, Version 2.0.
+   https://www.apache.org/licenses/LICENSE-2.0
+
+See NOTICE for attribution details.
+
+The protocol was originally incubated under the name "OTEP" (Operator Token
+Efficiency Protocol) and the distribution name "sigrank-standard". The legacy
+protocol version alias "sigrank/0.1-draft" is preserved in the schema for
+backward compatibility. See UNRESOLVED-DECISIONS.md UD-1 for the rename
+rationale.
