@@ -147,19 +147,27 @@ async function main() {
     assert(!existsSync(join(tmpDir, "package", "test")), "test/ directory NOT included in tarball (correct)");
 
     // 3. Install production deps in the extracted package
-    // tteop-spec@0.1.4-draft may not be published yet during dev — temporarily
-    // remove it from the extracted package.json, install the other deps, then
-    // link tteop-spec locally.
+    // Try npm install first (works when tteop-spec is published). If that fails
+    // (dev environment where tteop-spec isn't published yet), fall back to
+    // removing tteop-spec from package.json and linking it locally.
     console.log("\n3. Install production dependencies");
     const extractedPkgPath = join(tmpDir, "package", "package.json");
-    const extractedPkg = JSON.parse(readFileSync(extractedPkgPath, "utf8"));
-    delete extractedPkg.dependencies["tteop-spec"];
-    writeFileSync(extractedPkgPath, JSON.stringify(extractedPkg, null, 2));
-    execSync("npm install --silent", { cwd: join(tmpDir, "package"), stdio: "pipe" });
-    execSync("npm link tteop-spec --silent", { cwd: join(tmpDir, "package"), stdio: "pipe" });
+    let tteopSpecInstalled = false;
+    try {
+      execSync("npm install --silent", { cwd: join(tmpDir, "package"), stdio: "pipe" });
+      tteopSpecInstalled = existsSync(join(tmpDir, "package", "node_modules", "tteop-spec"));
+    } catch {
+      // Fall back: remove tteop-spec, install other deps, link locally
+      const extractedPkg = JSON.parse(readFileSync(extractedPkgPath, "utf8"));
+      delete extractedPkg.dependencies["tteop-spec"];
+      writeFileSync(extractedPkgPath, JSON.stringify(extractedPkg, null, 2));
+      execSync("npm install --silent", { cwd: join(tmpDir, "package"), stdio: "pipe" });
+      execSync("npm link tteop-spec --silent", { cwd: join(tmpDir, "package"), stdio: "pipe" });
+      tteopSpecInstalled = existsSync(join(tmpDir, "package", "node_modules", "tteop-spec"));
+    }
     assert(existsSync(join(tmpDir, "package", "node_modules", "@modelcontextprotocol", "server")), "MCP server SDK installed");
     assert(existsSync(join(tmpDir, "package", "node_modules", "zod")), "zod installed");
-    assert(existsSync(join(tmpDir, "package", "node_modules", "tteop-spec")), "tteop-spec linked");
+    assert(tteopSpecInstalled, "tteop-spec installed/linked");
 
     // 4. Test the packaged bin with a real MCP handshake
     console.log("\n4. MCP handshake against packaged bin");

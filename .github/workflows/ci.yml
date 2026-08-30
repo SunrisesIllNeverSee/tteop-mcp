@@ -24,12 +24,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies
-        run: |
-          npm install @modelcontextprotocol/server@2.0.0 zod@4.5.4 --silent
-          # tteop-spec is published to npm — install from registry
-          npm install tteop-spec@0.1.4-draft --silent || true
-          # If tteop-spec isn't published yet, the tests will skip
-          # In production CI (after tteop-spec publish), this will succeed
+        run: npm install
 
       - name: Real MCP client test
         run: node test/test-mcp-client.mjs
