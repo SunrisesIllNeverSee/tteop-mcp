@@ -131,7 +131,13 @@ async function main() {
   // 1. npm pack
   console.log("1. npm pack");
   const tmpDir = mkdtempSync(join(tmpdir(), "tteop-mcp-pack-"));
-  const tarballName = execSync("npm pack --silent", { cwd: ROOT, encoding: "utf8" }).trim();
+  const packOutput = execSync("npm pack --silent", { cwd: ROOT, encoding: "utf8" });
+  const tarballName = packOutput
+    .split("\n")
+    .map((line) => line.trim())
+    .findLast((line) => line.endsWith(".tgz"));
+  assert(typeof tarballName === "string", "npm pack reports a tarball filename");
+  if (!tarballName) throw new Error(`npm pack did not report a tarball filename: ${packOutput}`);
   const tarballPath = join(ROOT, tarballName);
   assert(existsSync(tarballPath), `tarball created: ${tarballName}`);
 
@@ -144,6 +150,7 @@ async function main() {
     assert(pkgJson.bin?.["tteop-mcp"] === "bin/tteop-mcp.mjs", "packaged bin entry correct");
     assert(existsSync(join(tmpDir, "package", "bin", "tteop-mcp.mjs")), "packaged bin/tteop-mcp.mjs exists");
     assert(existsSync(join(tmpDir, "package", "src", "server.mjs")), "packaged src/server.mjs exists");
+    assert(existsSync(join(tmpDir, "package", "START-HERE.md")), "packaged START-HERE.md exists");
     assert(!existsSync(join(tmpDir, "package", "test")), "test/ directory NOT included in tarball (correct)");
 
     // 3. Install production deps in the extracted package

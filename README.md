@@ -4,6 +4,8 @@ Production MCP server for **TTEOP** — Token Telemetry Evaluation Operator Prot
 
 Build, validate, and describe TTEOP telemetry envelopes via the Model Context Protocol. Powered by the official [MCP TypeScript SDK v2](https://github.com/modelcontextprotocol/typescript-sdk) and the [`tteop-spec`](https://github.com/SunrisesIllNeverSee/otep-spec) reference implementation.
 
+New here? Read [START-HERE.md](START-HERE.md). Automated contributors must also read [AGENTS.md](AGENTS.md).
+
 ## Architecture
 
 This package is a thin MCP transport layer. All protocol logic — envelope construction, metric computation (banker's rounding), schema validation, and semantic rules — is delegated to `tteop-spec` via its stable JavaScript API:
@@ -75,15 +77,17 @@ const proc = spawn("npx", ["-y", "tteop-mcp"], { stdio: ["pipe", "pipe", "pipe"]
 ## Development
 
 ```bash
-# Install deps
-npm install
+# Install the exact locked dependency graph
+npm ci
 
 # Link tteop-spec locally (if not published to npm yet)
 cd ../otep-spec && npm link && cd ../tteop-mcp && npm link tteop-spec
 
 # Run tests
-npm test                    # real MCP client test (50 assertions)
-npm run test:packaged       # packaged tarball test (13 assertions)
+npm test                    # real MCP client test
+npm run test:packaged       # packaged tarball test
+npm run test:release        # package/lockfile/registry version agreement
+npm run test:all            # complete local release gate
 
 # Run with MCP Inspector
 npm run inspect
@@ -102,22 +106,25 @@ npm start
 - [x] stdout contains protocol messages only
 - [x] CI runs an actual MCP client against the packaged tarball
 
-## Distribution roadmap
+## Distribution status and release order
 
-This package is built and tested but not yet published. The next steps require owner credentials:
+`tteop-mcp@0.2.0` is currently published to npm and listed in the MCP Registry and Glama. Release `0.2.1` repairs source/package provenance, upgrades the exact protocol dependency to `tteop-spec@0.1.5-draft`, and adds release hardening.
 
-1. **Publish `tteop-spec@0.1.4-draft`** to npm (prerequisite — this package pins it exactly).
-2. **Publish `tteop-mcp@0.2.0`** to npm.
-3. **Publish to the MCP Registry** using `mcp-publisher`:
+The required release order is:
+
+1. Confirm `tteop-spec@0.1.5-draft` is available from npm.
+2. Merge the `tteop-mcp@0.2.1` release commit with every required check green.
+3. Run the manual **Release npm package** workflow. It publishes with npm provenance and creates GitHub release `v0.2.1` at the same commit.
+4. Confirm `npm view tteop-mcp@0.2.1 gitHead` equals the GitHub release commit.
+5. Publish the matching `server.json` to the MCP Registry:
    ```bash
-   mcp-publisher init      # generates server.json (already present)
-   mcp-publisher login     # GitHub auth
-   mcp-publisher publish   # publishes server.json to the registry
+   mcp-publisher login
+   mcp-publisher publish
    ```
-   The `mcpName` in `package.json` (`io.github.SunrisesIllNeverSee/tteop-mcp`) must match the `name` in `server.json`.
-4. **Submit to Glama** using the `glama.json` metadata.
-5. **Test privately on Glama** — verify the live Inspector session passes.
-6. **Switch the listing public** after the live Inspector session passes.
+6. Confirm the MCP Registry and Glama show version `0.2.1` and all four tools.
+7. From a clean directory, run `npx -y tteop-mcp@0.2.1 --version` and a real MCP client invocation.
+
+Never publish from an uncommitted working tree. Package version, lockfile, `server.json`, Git tag, GitHub release, npm `gitHead`, and MCP Registry version must identify the same release.
 
 ## License
 
