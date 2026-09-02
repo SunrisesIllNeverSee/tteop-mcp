@@ -15,7 +15,11 @@ assert.equal(packageJson.version, "0.2.1", "package version must be the approved
 assert.equal(packageLock.version, packageJson.version, "lockfile version must match package version");
 assert.equal(packageLock.packages[""].version, packageJson.version, "lockfile root package version must match");
 assert.equal(serverJson.version, packageJson.version, "MCP Registry server version must match package version");
-assert.equal(serverJson.packages[0].version, packageJson.version, "MCP Registry npm version must match package version");
+const npmPackage = serverJson.packages.find(
+  (entry) => entry.registryType === "npm" && entry.identifier === packageJson.name,
+);
+assert(npmPackage, "server.json must contain the matching npm package");
+assert.equal(npmPackage.version, packageJson.version, "MCP Registry npm version must match package version");
 assert.equal(packageJson.dependencies["tteop-spec"], "0.1.5-draft", "tteop-spec must be pinned exactly");
 assert.equal(packageLock.packages[""].dependencies["tteop-spec"], "0.1.5-draft", "lockfile must preserve exact tteop-spec pin");
 assert.equal(packageJson.mcpName, serverJson.name, "package mcpName must match MCP Registry name");

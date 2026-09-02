@@ -80,7 +80,8 @@ const proc = spawn("npx", ["-y", "tteop-mcp"], { stdio: ["pipe", "pipe", "pipe"]
 # Install the exact locked dependency graph
 npm ci
 
-# Link tteop-spec locally (if not published to npm yet)
+# Optional: test unpublished local tteop-spec changes after the clean install.
+# This overrides node_modules locally and is never used by CI or releases.
 cd ../otep-spec && npm link && cd ../tteop-mcp && npm link tteop-spec
 
 # Run tests

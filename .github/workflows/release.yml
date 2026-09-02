@@ -24,6 +24,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
@@ -44,6 +45,10 @@ jobs:
       - run: npm run test:all
       - run: npm audit --omit=dev --audit-level=high
       - run: npm pack --dry-run
+
+      - name: Require a clean release worktree
+        run: |
+          [[ -z "$(git status --porcelain=v1 --untracked-files=all)" ]]
 
       - name: Publish with npm provenance
         env:
