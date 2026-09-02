@@ -1,6 +1,6 @@
 {
   "name": "tteop-mcp",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "mcpName": "io.github.SunrisesIllNeverSee/tteop-mcp",
   "description": "Production MCP server for TTEOP — Token Telemetry Evaluation Operator Protocol. Build, validate, and describe TTEOP telemetry envelopes via the Model Context Protocol.",
   "type": "module",
@@ -11,7 +11,10 @@
     "start": "node bin/tteop-mcp.mjs",
     "inspect": "npx @modelcontextprotocol/inspector node bin/tteop-mcp.mjs",
     "test": "node test/test-mcp-client.mjs",
-    "test:packaged": "node test/test-packaged-tarball.mjs"
+    "test:packaged": "node test/test-packaged-tarball.mjs",
+    "test:release": "node test/test-release-metadata.mjs",
+    "test:all": "npm test && npm run test:packaged && npm run test:release",
+    "prepack": "npm run test:release"
   },
   "keywords": [
     "tteop",
@@ -41,13 +44,14 @@
   },
   "dependencies": {
     "@modelcontextprotocol/server": "2.0.0",
-    "tteop-spec": "0.1.4-draft",
+    "tteop-spec": "0.1.5-draft",
     "zod": "4.5.4"
   },
   "files": [
     "bin/",
     "src/",
     "server.json",
+    "START-HERE.md",
     "README.md",
     "LICENSE"
   ]

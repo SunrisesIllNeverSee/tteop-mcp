@@ -1,0 +1,61 @@
+name: Release npm package
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Exact package version to publish
+        required: true
+        type: string
+      confirmation:
+        description: Type PUBLISH-TTEOP-MCP to authorize publication
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  publish:
+    name: Publish npm and create GitHub release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "22"
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - name: Confirm explicit publication authorization
+        env:
+          RELEASE_CONFIRMATION: ${{ inputs.confirmation }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          [[ "$RELEASE_CONFIRMATION" == "PUBLISH-TTEOP-MCP" ]]
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          [[ "$RELEASE_VERSION" == "$PACKAGE_VERSION" ]]
+
+      - run: npm ci
+      - run: npm run test:all
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npm pack --dry-run
+
+      - name: Publish with npm provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public --provenance
+
+      - name: Create immutable GitHub release at the published commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          gh release create "v${RELEASE_VERSION}" \
+            --target "${{ github.sha }}" \
+            --title "tteop-mcp v${RELEASE_VERSION}" \
+            --generate-notes

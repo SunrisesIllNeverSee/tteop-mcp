@@ -250,8 +250,42 @@ async function main() {
       assert(result.content?.[0]?.text?.length > 0, "missing output error has message");
     }
 
-    // 9. tteop_validate_envelope — valid envelope
-    console.log("\n9. tteop_validate_envelope (valid)");
+    // 9. tteop_build_envelope — invalid privacy mode rejected by the MCP schema
+    console.log("\n9. tteop_build_envelope (invalid — privacy mode)");
+    {
+      const result = await client.send("tools/call", {
+        name: "tteop_build_envelope",
+        arguments: { input: 100, output: 50, privacy_mode: "public" },
+      });
+      assert(result.isError === true, "unknown privacy mode returns isError: true");
+      assert(result.content?.[0]?.text?.length > 0, "privacy-mode error has message");
+    }
+
+    // 10. tteop_build_envelope — invalid provenance level rejected by schema
+    console.log("\n10. tteop_build_envelope (invalid — provenance level)");
+    {
+      const result = await client.send("tools/call", {
+        name: "tteop_build_envelope",
+        arguments: { input: 100, output: 50, provenance_level: "verified" },
+      });
+      assert(result.isError === true, "unknown provenance level returns isError: true");
+      assert(result.content?.[0]?.text?.length > 0, "provenance-level error has message");
+    }
+
+    // 11. The canonical enum includes signed, but the builder rejects it until
+    // a complete signature object exists (SRP-SIG-001).
+    console.log("\n11. tteop_build_envelope (signed requires signature object)");
+    {
+      const result = await client.send("tools/call", {
+        name: "tteop_build_envelope",
+        arguments: { input: 100, output: 50, provenance_level: "signed" },
+      });
+      assert(result.isError === true, "signed provenance without signature object returns isError: true");
+      assert(result.content?.[0]?.text?.length > 0, "signed-provenance error has message");
+    }
+
+    // 12. tteop_validate_envelope — valid envelope
+    console.log("\n12. tteop_validate_envelope (valid)");
     const validateResult = await client.send("tools/call", {
       name: "tteop_validate_envelope",
       arguments: { envelope: builtEnvelope },
@@ -259,8 +293,8 @@ async function main() {
     const validationResult = JSON.parse(validateResult.content[0].text);
     assert(validationResult.valid === true, "valid envelope passes validation");
 
-    // 10. tteop_validate_envelope — invalid envelope (forbidden field)
-    console.log("\n10. tteop_validate_envelope (invalid — forbidden field)");
+    // 13. tteop_validate_envelope — invalid envelope (forbidden field)
+    console.log("\n13. tteop_validate_envelope (invalid — forbidden field)");
     const badEnvelope = { ...builtEnvelope, prompt: "should be rejected" };
     const badValidateResult = await client.send("tools/call", {
       name: "tteop_validate_envelope",
@@ -273,8 +307,8 @@ async function main() {
       "semantic errors mention forbidden field",
     );
 
-    // 11. tteop_describe_protocol
-    console.log("\n11. tteop_describe_protocol");
+    // 14. tteop_describe_protocol
+    console.log("\n14. tteop_describe_protocol");
     const describeResult = await client.send("tools/call", {
       name: "tteop_describe_protocol",
       arguments: {},
@@ -287,8 +321,8 @@ async function main() {
     assert(Array.isArray(protocolInfo.metrics), "metrics is an array");
     assert(protocolInfo.metrics.length === 5, "5 metrics defined");
 
-    // 12. tteop_run_conformance
-    console.log("\n12. tteop_run_conformance");
+    // 15. tteop_run_conformance
+    console.log("\n15. tteop_run_conformance");
     const conformanceResult = await client.send("tools/call", {
       name: "tteop_run_conformance",
       arguments: {},
@@ -297,8 +331,8 @@ async function main() {
     assert(conformance.failed === 0, `conformance suite: 0 failures (got ${conformance.failed})`);
     assert(conformance.total > 0, `conformance suite: has tests (got ${conformance.total})`);
 
-    // 13. stdout contains protocol messages only (no stray logs)
-    console.log("\n13. stdout protocol-only check");
+    // 16. stdout contains protocol messages only (no stray logs)
+    console.log("\n16. stdout protocol-only check");
     const rawStdout = client.getRawStdout();
     const stdoutLines = rawStdout.split("\n").filter((l) => l.trim());
     let allValidJsonRpc = true;
