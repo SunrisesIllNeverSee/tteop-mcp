@@ -258,7 +258,8 @@ async function main() {
         arguments: { input: 100, output: 50, privacy_mode: "public" },
       });
       assert(result.isError === true, "unknown privacy mode returns isError: true");
-      assert(result.content?.[0]?.text?.length > 0, "privacy-mode error has message");
+      const errorText = String(result.content?.[0]?.text ?? "").toLowerCase();
+      assert(errorText.includes("privacy_mode"), "privacy-mode error identifies the invalid field");
     }
 
     // 10. tteop_build_envelope — invalid provenance level rejected by schema
@@ -269,7 +270,8 @@ async function main() {
         arguments: { input: 100, output: 50, provenance_level: "verified" },
       });
       assert(result.isError === true, "unknown provenance level returns isError: true");
-      assert(result.content?.[0]?.text?.length > 0, "provenance-level error has message");
+      const errorText = String(result.content?.[0]?.text ?? "").toLowerCase();
+      assert(errorText.includes("provenance_level"), "provenance-level error identifies the invalid field");
     }
 
     // 11. The canonical enum includes signed, but the builder rejects it until
@@ -281,7 +283,8 @@ async function main() {
         arguments: { input: 100, output: 50, provenance_level: "signed" },
       });
       assert(result.isError === true, "signed provenance without signature object returns isError: true");
-      assert(result.content?.[0]?.text?.length > 0, "signed-provenance error has message");
+      const errorText = String(result.content?.[0]?.text ?? "").toLowerCase();
+      assert(errorText.includes("signature"), "signed-provenance error identifies the missing signature");
     }
 
     // 12. tteop_validate_envelope — valid envelope
