@@ -29,9 +29,11 @@ jobs:
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "22"
-          cache: npm
           # No registry-url here on purpose: it writes an empty _authToken
           # line to .npmrc that defeats OIDC trusted publishing.
+          # No cache: a poisoned cache from a lower-privileged workflow could
+          # carry compromised dependencies into this privileged publish job.
+          package-manager-cache: false
 
       - name: Upgrade npm for OIDC trusted publishing
         # Node 22 ships npm 10.9.x; OIDC trusted publishing requires npm >= 11.5.1.
