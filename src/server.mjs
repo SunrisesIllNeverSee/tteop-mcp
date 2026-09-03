@@ -47,7 +47,10 @@ function serverVersion() {
   }
 }
 
-const MAX_SAFE = 9007199254740991;
+// Token bounds mirror tteop-spec's builder validation (non-negative safe
+// integer). Using Number.MAX_SAFE_INTEGER directly avoids hardcoding a
+// magic number that could drift from the canonical builder.
+const MAX_SAFE = Number.MAX_SAFE_INTEGER;
 
 // ─── Zod schemas ────────────────────────────────────────────────────────────
 
@@ -194,6 +197,12 @@ export function createServer() {
 }
 
 // ─── Protocol description (delegates to tteop-spec constants) ───────────────
+// The formula strings below are human-readable descriptions of what
+// tteop-spec's computeMetrics() calculates. They are NOT independent
+// formula definitions — the executable semantics live in tteop-spec.
+// The conformance suite (runConformance) verifies that computeMetrics
+// produces the expected values, catching any drift between these
+// descriptions and the canonical implementation.
 
 function describeProtocol() {
   return {

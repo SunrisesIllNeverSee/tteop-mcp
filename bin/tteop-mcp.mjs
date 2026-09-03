@@ -52,7 +52,7 @@ Tools:
   tteop_describe_protocol    Get TTEOP protocol metadata and metric definitions
   tteop_run_conformance      Run the conformance suite
 
-Protocol: tteop/0.1-draft
+Protocol: tteop/0.1-draft (via tteop-spec@0.1.5-draft)
 License: Apache-2.0
 `);
   process.exit(0);
