@@ -11,7 +11,7 @@ npm run test:all
 
 ## Authority and scope
 
-- `otep-spec` is authoritative for schemas, formulas, null semantics, privacy modes, provenance levels, and conformance behavior.
+- `tteop-spec` is authoritative for schemas, formulas, null semantics, privacy modes, provenance levels, and conformance behavior.
 - Import the exact `tteop-spec` release. Do not reproduce protocol logic in this repository.
 - Keep the public surface to the four declared tools unless a reviewed change explicitly expands it.
 - stdout is reserved for JSON-RPC. Diagnostics go to stderr.
