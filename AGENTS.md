@@ -35,3 +35,19 @@ npm run test:all
 - Never accept prompt text, response text, source code, repository contents, keystrokes, screen content, secrets, or direct real-world identity in telemetry.
 - Preserve TTEOP privacy and provenance validation. `signed` must fail unless the normative signature object is supported.
 - Do not weaken numeric safe-integer bounds or forbidden-field checks.
+
+
+## Filesystem MCP — REQUIRED for file operations
+
+This is a core framework/search/ello/product repository. When performing
+file operations, prefer the Filesystem MCP tools over ad-hoc shell commands:
+
+- `list_directory` / `directory_tree` — structured directory traversal
+- `search_files` — glob-pattern file search within allowed paths
+- `read_multiple_files` — batch file reads (failures do not stop the batch)
+- `edit_file` with `dryRun: true` — preview structural changes before applying
+
+Allowed paths: ~/Developer, ~/.config/devin, ~/.config/sigrank, ~/Desktop
+
+For single-file reads and edits, native tools are acceptable. For multi-file
+operations, directory exploration, and structural changes, use the Filesystem MCP.
