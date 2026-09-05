@@ -37,8 +37,8 @@ jobs:
 
       - name: Upgrade npm for OIDC trusted publishing
         # Node 22 ships npm 10.9.x; OIDC trusted publishing requires npm >= 11.5.1.
-        # Pin npm 11 (not @latest) to avoid npm 12 which needs Node >= 22.22.2.
-        run: npm install -g npm@11
+        # Pin npm 11.5.1 (not @latest) to avoid npm 12 which needs Node >= 22.22.2.
+        run: npm install -g npm@11.5.1
 
       - name: Confirm explicit publication authorization
         env:
