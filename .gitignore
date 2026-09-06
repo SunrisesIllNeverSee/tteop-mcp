@@ -4,3 +4,7 @@ node_modules/
 *.swp
 .idea/
 .vscode/
+
+# Skylos scan output
+skylos-sec.json
+.skylos/
