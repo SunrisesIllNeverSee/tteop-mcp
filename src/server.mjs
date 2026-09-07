@@ -201,8 +201,9 @@ export function createServer() {
 // tteop-spec's computeMetrics() calculates. They are NOT independent
 // formula definitions — the executable semantics live in tteop-spec.
 // The conformance suite (runConformance) verifies that computeMetrics
-// produces the expected values, catching any drift between these
-// descriptions and the canonical implementation.
+// produces the expected numeric values for known input vectors. It does
+// NOT compare these description strings against tteop-spec's formula text —
+// a changed description here would not be caught by the conformance suite.
 
 function describeProtocol() {
   return {
