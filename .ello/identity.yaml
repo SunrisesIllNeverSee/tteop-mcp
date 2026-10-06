@@ -1,0 +1,5 @@
+repo_id: tteop_mcp
+satellite_version: 1
+control_plane: ello-repo-control
+authority_plane: search-authority
+initialized_at: '2026-10-06T02:20:58.802423-04:00'
