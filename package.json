@@ -43,7 +43,7 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@modelcontextprotocol/server": "2.0.0",
+    "@modelcontextprotocol/server": "2.3.0",
     "tteop-spec": "0.1.5-draft",
     "zod": "4.5.4"
   },
