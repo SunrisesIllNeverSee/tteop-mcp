@@ -130,3 +130,16 @@ Never publish from an uncommitted working tree. Package version, lockfile, `serv
 ## License
 
 Apache-2.0
+
+### Published dependency security lock
+
+`npm-shrinkwrap.json` travels with the CLI package and preserves its reviewed
+runtime graph when installed inside another project. The exact normative
+`tteop-spec` dependency and its dependencies are bundled so that a consumer
+installing an older URI library cannot deduplicate the server onto it. The repository
+`package-lock.json` mirrors it; release checks require exact agreement.
+After changing dependencies, update the shrinkwrap with npm and copy it to
+`package-lock.json`. Root-only npm `overrides` do not protect consumer installs.
+The packaged test checks a fresh consumer install, its production audit and MCP
+handshake, and verifies that an older consumer `fast-uri` cannot downgrade the
+server's pinned dependency.

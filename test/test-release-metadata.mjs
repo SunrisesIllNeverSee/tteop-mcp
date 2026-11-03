@@ -9,6 +9,8 @@ function readJson(path) {
 
 const packageJson = readJson("../package.json");
 const packageLock = readJson("../package-lock.json");
+const shrinkwrap = readJson("../npm-shrinkwrap.json");
+assert.deepEqual(shrinkwrap, packageLock, "published shrinkwrap and repository lock must agree");
 const serverJson = readJson("../server.json");
 
 assert.equal(packageJson.version, "0.2.1", "package version must be the approved release version");
