@@ -130,3 +130,14 @@ Never publish from an uncommitted working tree. Package version, lockfile, `serv
 ## License
 
 Apache-2.0
+
+### Published dependency security bundle
+
+All direct runtime dependencies and their transitive dependencies are bundled
+from the reviewed `package-lock.json`. This includes the exact normative
+`tteop-spec` release and patched URI parser. A consumer installing an older URI
+library cannot deduplicate the server onto it. Root-only npm overrides do not
+protect consumer installs, and npm 12 no longer honors published shrinkwraps.
+After changing dependencies, regenerate the lockfile and perform a clean install
+before packing. The packaged tests verify a fresh consumer install, its production
+audit and MCP handshake, and isolation from an older consumer `fast-uri`.

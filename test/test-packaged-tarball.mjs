@@ -10,11 +10,12 @@
  * License: Apache-2.0
  */
 
-import { execSync, spawn } from "node:child_process";
+import { execSync, execFileSync, spawn } from "node:child_process";
 import { mkdtempSync, rmSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { tmpdir } from "node:os";
+import { createRequire } from "node:module";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
@@ -131,7 +132,7 @@ async function main() {
   // 1. npm pack
   console.log("1. npm pack");
   const tmpDir = mkdtempSync(join(tmpdir(), "tteop-mcp-pack-"));
-  const packOutput = execSync("npm pack --silent", { cwd: ROOT, encoding: "utf8" });
+  const packOutput = execSync("npm pack --foreground-scripts", { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] });
   const tarballName = packOutput
     .split("\n")
     .map((line) => line.trim())
@@ -152,6 +153,10 @@ async function main() {
     assert(existsSync(join(tmpDir, "package", "src", "server.mjs")), "packaged src/server.mjs exists");
     assert(existsSync(join(tmpDir, "package", "START-HERE.md")), "packaged START-HERE.md exists");
     assert(!existsSync(join(tmpDir, "package", "test")), "test/ directory NOT included in tarball (correct)");
+
+    const bundledUri = JSON.parse(readFileSync(join(tmpDir, "package", "node_modules", "fast-uri", "package.json"), "utf8"));
+    assert(bundledUri.version === "3.1.9", "bundled runtime includes patched fast-uri");
+    assert(pkgJson.bundleDependencies.length === Object.keys(pkgJson.dependencies).length && Object.keys(pkgJson.dependencies).every((name) => pkgJson.bundleDependencies.includes(name)), "all direct runtime dependencies are bundled");
 
     // 3. Install production deps in the extracted package
     // Try npm install first (works when tteop-spec is published). If that fails
@@ -184,6 +189,35 @@ async function main() {
     assert(handshakeResult.toolsCount === 4, `tools/list returns 4 tools (got ${handshakeResult.toolsCount})`);
     assert(handshakeResult.buildWorks, "tteop_build_envelope works against packaged bin");
     assert(handshakeResult.stdoutClean, "stdout contains only JSON-RPC messages");
+
+    // A real consumer installs the original tarball as a dependency. This must
+    // not inherit the package's root-only overrides or the local-spec fallback.
+    console.log("\n5. Install tarball into an independent consumer");
+    const consumer = join(tmpDir, "consumer");
+    const { mkdirSync } = await import("node:fs");
+    mkdirSync(consumer);
+    writeFileSync(join(consumer, "package.json"), JSON.stringify({ name: "tteop-consumer-fixture", version: "1.0.0", private: true }));
+    execFileSync("npm", ["install", tarballPath, "--ignore-scripts", "--no-audit", "--no-fund"], { cwd: consumer, stdio: "pipe" });
+    const consumerRequire = createRequire(join(consumer, "package.json"));
+    const consumerPackage = consumerRequire.resolve("tteop-mcp/package.json");
+    // Resolve in a fresh process: npm can move dependencies between checks,
+    // while this process retains Node's earlier resolution-path cache.
+    const uriVersion = () => execFileSync(process.execPath, ["-e",
+      "const make=require('node:module').createRequire;const pkg=make(process.argv[1]);const spec=make(pkg.resolve('tteop-spec/package.json'));const ajv=make(spec.resolve('ajv'));process.stdout.write(require(ajv.resolve('fast-uri/package.json')).version)",
+      consumerPackage], { encoding: "utf8" }).trim();
+    assert(uriVersion() === "3.1.9", "consumer resolves patched fast-uri inside TTEOP dependency graph");
+    const audit = JSON.parse(execFileSync("npm", ["audit", "--omit=dev", "--json"], { cwd: consumer, encoding: "utf8" }));
+    assert(audit.metadata.vulnerabilities.total === 0, "independent consumer production audit is clean");
+    const consumerResult = await testMcpHandshake(join(dirname(consumerPackage), "bin/tteop-mcp.mjs"));
+    assert(consumerResult.initialized && consumerResult.toolsCount === 4 && consumerResult.buildWorks && consumerResult.stdoutClean,
+      "consumer-installed package initializes, exposes four tools and builds an envelope with clean stdout");
+
+    // An unrelated consumer's older direct URI dependency must not downgrade
+    // the server's security pin. This intentionally vulnerable fixture remains
+    // only in the temp directory and is removed in finally.
+    execFileSync("npm", ["install", "fast-uri@3.1.8", "--ignore-scripts", "--no-audit", "--no-fund"], { cwd: consumer, stdio: "pipe" });
+    assert(JSON.parse(readFileSync(consumerRequire.resolve("fast-uri/package.json"), "utf8")).version === "3.1.8", "older consumer dependency fixture is in place");
+    assert(uriVersion() === "3.1.9", "TTEOP stays patched even with an older consumer dependency");
 
   } finally {
     rmSync(tarballPath, { force: true });
