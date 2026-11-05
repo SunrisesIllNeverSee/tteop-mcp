@@ -154,8 +154,9 @@ async function main() {
     assert(existsSync(join(tmpDir, "package", "START-HERE.md")), "packaged START-HERE.md exists");
     assert(!existsSync(join(tmpDir, "package", "test")), "test/ directory NOT included in tarball (correct)");
 
-    const publishedLock = JSON.parse(readFileSync(join(tmpDir, "package", "npm-shrinkwrap.json"), "utf8"));
-    assert(publishedLock.packages["node_modules/fast-uri"].version === "3.1.9", "published shrinkwrap pins patched fast-uri");
+    const bundledUri = JSON.parse(readFileSync(join(tmpDir, "package", "node_modules", "fast-uri", "package.json"), "utf8"));
+    assert(bundledUri.version === "3.1.9", "bundled runtime includes patched fast-uri");
+    assert(pkgJson.bundleDependencies.length === Object.keys(pkgJson.dependencies).length && Object.keys(pkgJson.dependencies).every((name) => pkgJson.bundleDependencies.includes(name)), "all direct runtime dependencies are bundled");
 
     // 3. Install production deps in the extracted package
     // Try npm install first (works when tteop-spec is published). If that fails

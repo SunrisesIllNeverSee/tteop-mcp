@@ -53,13 +53,11 @@
     "server.json",
     "START-HERE.md",
     "README.md",
-    "LICENSE",
-    "npm-shrinkwrap.json"
+    "LICENSE"
   ],
-  "overrides": {
-    "fast-uri": "3.1.9"
-  },
   "bundleDependencies": [
-    "tteop-spec"
+    "@modelcontextprotocol/server",
+    "tteop-spec",
+    "zod"
   ]
 }
