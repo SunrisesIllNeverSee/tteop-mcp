@@ -132,7 +132,7 @@ async function main() {
   // 1. npm pack
   console.log("1. npm pack");
   const tmpDir = mkdtempSync(join(tmpdir(), "tteop-mcp-pack-"));
-  const packOutput = execSync("npm pack --silent", { cwd: ROOT, encoding: "utf8" });
+  const packOutput = execSync("npm pack --foreground-scripts", { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] });
   const tarballName = packOutput
     .split("\n")
     .map((line) => line.trim())
